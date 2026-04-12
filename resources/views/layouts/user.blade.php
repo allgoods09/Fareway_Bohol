@@ -1,9 +1,8 @@
-{{-- resources/views/layouts/user.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Fareway Bohol')</title>
 
@@ -54,7 +53,7 @@
         .hero {
             background: var(--navy);
             position: relative;
-            overflow: visible; /* Change from 'hidden' to 'visible' */
+            overflow: visible;
             padding-bottom: 60px;
         }
         .hero-dots {
@@ -68,7 +67,7 @@
             padding: 0 40px;
             position: relative;
             z-index: 1;
-            overflow: visible; /* Add this */
+            overflow: visible;
         }
         
         /* Integrated Navigation inside Hero */
@@ -110,7 +109,7 @@
             color: #34d399;
         }
         
-        /* Center Navigation Links */
+        /* Desktop Navigation Links */
         .nav-center {
             display: flex;
             align-items: center;
@@ -137,6 +136,62 @@
             color: #fff;
         }
         .nav-link.active {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: rgba(255,255,255,.1);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .mobile-menu-btn:hover {
+            background: rgba(255,255,255,.2);
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255,255,255,.1);
+            margin-top: 8px;
+        }
+        .mobile-nav.active {
+            display: flex;
+        }
+        .mobile-nav-link {
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255,255,255,.7);
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all .2s;
+            width: 100%;
+            text-align: left;
+        }
+        .mobile-nav-link:hover {
+            background: rgba(255,255,255,.1);
+            color: #fff;
+        }
+        .mobile-nav-link.active {
             background: rgba(255,255,255,.15);
             color: #fff;
         }
@@ -192,7 +247,6 @@
             transform: rotate(180deg);
         }
         
-        /* Profile Dropdown Styles - Increased z-index */
         .profile-dropdown {
             position: relative;
             display: inline-block;
@@ -272,7 +326,6 @@
             color: #dc2626;
         }
 
-        /* Admin/Moderator badge in dropdown */
         .role-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -393,11 +446,11 @@
             margin-top: 4px;
         }
 
-        /* Main Content Container - FULL WIDTH */
+        /* Main Content Container */
         .main-content {
             width: 100%;
             padding: 100px 200px 60px;
-            flex: 1; /* This makes it take all available space */
+            flex: 1;
         }
 
         /* Footer */
@@ -408,20 +461,15 @@
             padding: 28px 24px;
             font-size: 12px;
             border-top: 1px solid rgba(255,255,255,.05);
-            flex-shrink: 0; /* Prevent footer from shrinking */
-            margin-top: auto; /* Push to bottom if content is short */
+            flex-shrink: 0;
+            margin-top: auto;
         }
         footer strong {
             color: rgba(255,255,255,.7);
         }
 
-        /* Responsive */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .hero-nav {
-                flex-direction: column;
-                gap: 16px;
-                margin-bottom: 40px;
-            }
             .hero-inner {
                 padding: 0 20px;
             }
@@ -437,18 +485,74 @@
             .hero-stat-num {
                 font-size: 18px;
             }
-            .profile-name {
+            
+            /* Hide desktop nav, show mobile menu button */
+            .nav-center {
                 display: none;
             }
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            /* Adjust hero-nav for mobile */
+            .hero-nav {
+                flex-wrap: wrap;
+                margin-bottom: 40px;
+            }
+            
+            .profile-name {
+                display: inline-block;
+            }
+            
             .dropdown-menu {
                 width: 240px;
                 right: -10px;
             }
-            .nav-center {
-                order: 3;
-                width: 100%;
-                justify-content: center;
+        }
+
+        @media (max-width: 480px) {
+            .profile-name {
+                display: none;
             }
+            .btn-nav-login, .btn-nav-register {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .animate-modalSlideIn {
+            animation: modalSlideIn 0.2s ease-out;
+        }
+        .toast-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .fixed.inset-0.z-50 {
+            z-index: 999999 !important;
+        }
+
+        .bg-white.rounded-2xl {
+            z-index: 1000000 !important;
         }
     </style>
 
@@ -467,7 +571,7 @@
                 <span class="nav-brand">Fareway <span>Bohol</span></span>
             </a>
 
-            {{-- Center: Navigation Links --}}
+            {{-- Desktop Navigation Links --}}
             <div class="nav-center">
                 <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                     <i class="fas fa-home"></i> Home
@@ -483,7 +587,7 @@
                 </a>
             </div>
 
-            {{-- Right: Auth Section --}}
+            {{-- Right: Auth Section & Mobile Menu Button --}}
             <div class="nav-right">
                 @auth
                     {{-- Profile Dropdown --}}
@@ -514,6 +618,9 @@
                                 <a href="{{ route('user.saved-routes') }}" class="dropdown-item">
                                     <i class="fas fa-bookmark"></i> Saved Items
                                 </a>
+                                <a href="{{ route('user.my-reports') }}" class="dropdown-item">
+                                    <i class="fas fa-flag"></i> My Reports
+                                </a>
                                 @if(Auth::user()->role === 'admin')
                                     <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
                                         <i class="fas fa-shield-alt"></i> Admin Panel
@@ -539,6 +646,27 @@
                         <i class="fas fa-user-plus"></i> Sign Up
                     </a>
                 @endauth
+                
+                {{-- Mobile Menu Button --}}
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            {{-- Mobile Navigation Links (hidden by default) --}}
+            <div class="mobile-nav" id="mobileNav">
+                <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ route('user.recommended-places') }}" class="mobile-nav-link {{ request()->routeIs('user.recommended-places') ? 'active' : '' }}">
+                    <i class="fas fa-map-marker-alt"></i> Places
+                </a>
+                <a href="{{ route('about') }}" class="mobile-nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
+                    <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="{{ route('user.report.create') }}" class="mobile-nav-link {{ request()->routeIs('user.report.*') ? 'active' : '' }}">
+                    <i class="fas fa-flag"></i> Report
+                </a>
             </div>
         </div>
 
@@ -559,7 +687,40 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
+{{-- Global Toast Notification Container --}}
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
 <script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileNav.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (mobileNav.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    }
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (mobileNav && mobileNav.classList.contains('active')) {
+            if (!mobileNav.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
+                mobileNav.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        }
+    });
+
     // Dropdown toggle function
     function toggleDropdown() {
         const dropdown = document.getElementById('profileDropdown');
@@ -583,8 +744,46 @@
             if (dropdown) {
                 dropdown.classList.remove('active');
             }
+            if (mobileNav && mobileNav.classList.contains('active')) {
+                mobileNav.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
         }
     });
+
+    // Global Toast Functions
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        const colors = {
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            warning: 'bg-amber-500',
+            info: 'bg-blue-500'
+        };
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        
+        toast.className = `toast-slide-in ${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 min-w-[200px]`;
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${message}`;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    let confirmCallback = null;
 </script>
 
 @stack('scripts')

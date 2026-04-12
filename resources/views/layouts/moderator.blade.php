@@ -11,6 +11,34 @@
     
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Toast Animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        .toast-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        .toast-slide-out {
+            animation: slideOut 0.3s ease-out;
+        }
     </style>
     
     <!-- Font Awesome -->
@@ -91,27 +119,62 @@
 
     {{-- Main Content --}}
     <main class="ml-60 flex-1 p-8 min-h-screen">
-        @if(session('success'))
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                {{ session('success') }}
-            </div>
-        @endif
-        
-        @if(session('error'))
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {{ session('error') }}
-            </div>
-        @endif
-        
         @yield('content')
     </main>
 </div>
+
+{{-- Global Toast Container --}}
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+<script>
+    // Global Toast Function
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            console.error('Toast container not found');
+            return;
+        }
+        
+        const toast = document.createElement('div');
+        
+        const colors = {
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            warning: 'bg-amber-500',
+            info: 'bg-blue-500'
+        };
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        
+        toast.className = `toast-slide-in ${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 min-w-[200px]`;
+        toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${message}`;
+        container.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('toast-slide-out');
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Check for flash messages on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+            showToast('{{ session('success') }}', 'success');
+        @endif
+        
+        @if(session('error'))
+            showToast('{{ session('error') }}', 'error');
+        @endif
+    });
+</script>
 
 @stack('scripts')
 </body>

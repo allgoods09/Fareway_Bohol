@@ -8,9 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Traits\LogsActivity;
 
 class AuthenticatedSessionController extends Controller
 {
+
+    use LogsActivity;
     /**
      * Display the login view.
      */
@@ -30,6 +33,8 @@ class AuthenticatedSessionController extends Controller
 
         // Custom redirect based on role
         $user = Auth::user();
+
+        $this->logActivity('login', 'user', Auth::id(), 'User logged in');
         
         if ($user->role === 'admin') {
             return redirect()->intended(route('home'));
@@ -52,6 +57,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
+        $this->logActivity('logout', 'user', Auth::id(), 'User logged out');
+
         return redirect('/');
+
     }
 }

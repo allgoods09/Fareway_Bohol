@@ -1,20 +1,30 @@
 <?php
-// app/Http/Controllers/WelcomeController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\RecommendedPlace;
+use App\Models\SavedRoute;
+use Illuminate\Support\Facades\Auth;
 
 class WelcomeController extends Controller
 {
     public function index()
     {
-        // Get only top 5 active places
         $recommendedPlaces = RecommendedPlace::where('is_active', true)
+            ->withCount('savedRoutes')
             ->latest()
             ->limit(5)
             ->get();
+        
+        // Get saved place IDs for authenticated user
+        $savedPlaceIds = [];
+        if (Auth::check()) {
+            $savedPlaceIds = SavedRoute::where('user_id', Auth::id())
+                ->where('type', 'recommended_place')
+                ->pluck('recommended_place_id')
+                ->toArray();
+        }
             
-        return view('welcome', compact('recommendedPlaces'));
+        return view('welcome', compact('recommendedPlaces', 'savedPlaceIds'));
     }
 }

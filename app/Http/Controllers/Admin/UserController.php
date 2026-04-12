@@ -7,9 +7,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsActivity;
 
 class UserController extends Controller
 {
+
+    use LogsActivity;
+
     public function index()
     {
         $users = User::latest()->paginate(15);
@@ -35,6 +39,15 @@ class UserController extends Controller
         
         User::create($validated);
 
+        $user = User::create($validated);
+        
+        $this->logActivity(
+            'create_user',
+            'user',
+            $user->id,
+            "Created user: {$user->name} ({$user->email})"
+        );
+
         return redirect()->route('admin.users.index')
             ->with('success', 'User created successfully.');
     }
@@ -59,6 +72,13 @@ class UserController extends Controller
         }
 
         $user->update($validated);
+        
+        $this->logActivity(
+            'update_user',
+            'user',
+            $user->id,
+            "Updated user: {$user->name} ({$user->email})"
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully.');
@@ -72,6 +92,14 @@ class UserController extends Controller
         }
         
         $user->delete();
+
+        $this->logActivity(
+            'delete_user',
+            'user',
+            $user->id,
+            "Deleted user: {$user->name} ({$user->email})"
+        );
+
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
     }

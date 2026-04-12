@@ -96,12 +96,17 @@
                         <i class="fas fa-route"></i> Get Route
                     </button>
                     @auth
-                        <button class="btn-save-place save-place-btn" 
+                        @php
+                            $isSaved = auth()->check() && in_array($place->id, $savedPlaceIds ?? []);
+                        @endphp
+                        <button class="btn-save-place save-place-btn {{ $isSaved ? 'saved' : '' }}" 
                                 data-id="{{ $place->id }}"
                                 data-name="{{ addslashes($place->name) }}"
                                 data-lat="{{ $place->latitude }}"
-                                data-lng="{{ $place->longitude }}">
-                            <i class="far fa-bookmark"></i> Save
+                                data-lng="{{ $place->longitude }}"
+                                {{ $isSaved ? 'disabled' : '' }}>
+                            <i class="fas fa-bookmark"></i> 
+                            {{ $isSaved ? 'Saved' : 'Save' }}
                         </button>
                     @else
                         <button class="btn-save-place-disabled" onclick="showLoginMessage()">
@@ -433,6 +438,8 @@
     .btn-save-place.saved {
         background: #f59e0b;
         color: #fff;
+        cursor: default;
+        opacity: 0.8;
     }
 
     .btn-save-place-disabled {

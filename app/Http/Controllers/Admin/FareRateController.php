@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
+use App\Traits\LogsActivity;
 
 class FareRateController extends Controller
 {
+    use LogsActivity;
+
     public function index()
     {
         $vehicleTypes = VehicleType::all();
@@ -32,7 +35,14 @@ class FareRateController extends Controller
             'night_end' => 'required',
         ]);
 
-        VehicleType::create($validated);
+        $vehicle = VehicleType::create($validated);  // Store the result in a variable
+
+        $this->logActivity(
+            'create_vehicle',
+            'vehicle_type',
+            $vehicle->id,  // Now $vehicle is defined
+            "Created vehicle type: {$vehicle->name}"
+        );
 
         return redirect()->route('admin.fare-rates.index')
             ->with('success', 'Vehicle type created successfully.');
@@ -59,6 +69,13 @@ class FareRateController extends Controller
 
         $fareRate->update($validated);
 
+        $this->logActivity(
+            'update_vehicle',
+            'vehicle_type',
+            $fareRate->id,
+            "Updated vehicle type: {$fareRate->name}"
+        );
+        
         return redirect()->route('admin.fare-rates.index')
             ->with('success', 'Vehicle type updated successfully.');
     }
@@ -66,6 +83,14 @@ class FareRateController extends Controller
     public function destroy(VehicleType $fareRate)
     {
         $fareRate->delete();
+
+        $this->logActivity(
+            'delete_vehicle',
+            'vehicle_type',
+            $fareRate->id,
+            "Deleted vehicle type: {$fareRate->name}"
+        );
+
         return redirect()->route('admin.fare-rates.index')
             ->with('success', 'Vehicle type deleted successfully.');
     }

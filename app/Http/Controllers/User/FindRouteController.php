@@ -9,12 +9,15 @@ use App\Models\RouteSearchLog;
 use App\Models\SavedRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsActivity;
 
 class FindRouteController extends Controller
 {
+    use LogsActivity;
+
     public function index()
     {
-        return view('find-route');
+        return view('welcome');
     }
     
     public function calculateFares(Request $request)
@@ -56,6 +59,16 @@ class FindRouteController extends Controller
             'duration_minutes' => 'required|integer'
         ]);
         
+        // Get fare estimates for logging
+        $vehicles = VehicleType::where('is_active', true)->get();
+        $isNight = now()->hour >= 20 || now()->hour < 5;
+        $fareEstimates = [];
+        
+        foreach ($vehicles as $vehicle) {
+            $fare = $vehicle->calculateFare($request->distance_km, $isNight);
+            $fareEstimates[$vehicle->name] = $fare;
+        }
+        
         RouteSearchLog::create([
             'user_id' => Auth::id(),
             'origin_lat' => $request->origin_lat,
@@ -63,18 +76,22 @@ class FindRouteController extends Controller
             'dest_lat' => $request->dest_lat,
             'dest_lng' => $request->dest_lng,
             'distance_km' => $request->distance_km,
-            'duration_minutes' => $request->duration_minutes
+            'duration_minutes' => $request->duration_minutes,
+            'fare_estimates' => $fareEstimates // Add this line
         ]);
+
+        $this->logActivity(
+            'route_search',
+            'route',
+            null,
+            "Searched route from ({$request->origin_lat}, {$request->origin_lng}) to ({$request->dest_lat}, {$request->dest_lng})"
+        );
         
         return response()->json(['success' => true]);
     }
     
     public function saveRoute(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        
         $request->validate([
             'name' => 'required|string|max:255',
             'origin_lat' => 'required|numeric',
@@ -82,10 +99,10 @@ class FindRouteController extends Controller
             'origin_address' => 'nullable|string',
             'dest_lat' => 'required|numeric',
             'dest_lng' => 'required|numeric',
-            'dest_address' => 'nullable|string'
+            'dest_address' => 'nullable|string',
         ]);
         
-        SavedRoute::create([
+        $savedRoute = SavedRoute::create([  // Store the result in a variable
             'user_id' => Auth::id(),
             'name' => $request->name,
             'origin_lat' => $request->origin_lat,
@@ -96,6 +113,13 @@ class FindRouteController extends Controller
             'dest_address' => $request->dest_address,
             'type' => 'custom_route'
         ]);
+
+        $this->logActivity(
+            'save_route',
+            'saved_route',
+            $savedRoute->id,  // Now $savedRoute is defined
+            "Saved route: {$request->name}"
+        );
         
         return response()->json(['success' => true]);
     }

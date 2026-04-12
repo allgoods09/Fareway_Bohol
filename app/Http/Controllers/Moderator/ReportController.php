@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReportStatusUpdated;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -38,6 +41,7 @@ class ReportController extends Controller
             'admin_notes' => 'nullable|string',
         ]);
 
+        $oldStatus = $report->status;
         $report->status = $validated['status'];
         $report->admin_notes = $validated['admin_notes'];
         
@@ -47,6 +51,15 @@ class ReportController extends Controller
         }
         
         $report->save();
+
+        // Send email notification to user if status changed
+        if ($oldStatus !== $report->status && $report->user && $report->user->email) {
+            try {
+                Mail::to($report->user->email)->send(new ReportStatusUpdated($report));
+            } catch (\Exception $e) {
+                Log::error('Failed to send email: ' . $e->getMessage());
+            }
+        }
 
         return redirect()->route('moderator.reports.show', $report)
             ->with('success', 'Report status updated successfully.');

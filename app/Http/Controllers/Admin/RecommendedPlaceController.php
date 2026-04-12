@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\RecommendedPlace;
 use Illuminate\Http\Request;
+use App\Traits\LogsActivity;
 
 class RecommendedPlaceController extends Controller
 {
+
+    use LogsActivity;
+
     public function index()
     {
         $places = RecommendedPlace::latest()->paginate(10);
@@ -32,6 +36,15 @@ class RecommendedPlaceController extends Controller
 
         RecommendedPlace::create($validated);
 
+        $place = RecommendedPlace::create($validated);
+        
+        $this->logActivity(
+            'create_place',
+            'recommended_place',
+            $place->id,
+            "Created place: {$place->name}"
+        );
+
         return redirect()->route('admin.recommended-places.index')
             ->with('success', 'Recommended place created successfully.');
     }
@@ -54,6 +67,13 @@ class RecommendedPlaceController extends Controller
         ]);
 
         $recommendedPlace->update($validated);
+        
+        $this->logActivity(
+            'update_place',
+            'recommended_place',
+            $recommendedPlace->id,
+            "Updated place: {$recommendedPlace->name}"
+        );
 
         return redirect()->route('admin.recommended-places.index')
             ->with('success', 'Recommended place updated successfully.');
@@ -62,6 +82,14 @@ class RecommendedPlaceController extends Controller
     public function destroy(RecommendedPlace $recommendedPlace)
     {
         $recommendedPlace->delete();
+
+        $this->logActivity(
+            'delete_place',
+            'recommended_place',
+            $recommendedPlace->id,
+            "Deleted place: {$recommendedPlace->name}"
+        );
+
         return redirect()->route('admin.recommended-places.index')
             ->with('success', 'Recommended place deleted successfully.');
     }

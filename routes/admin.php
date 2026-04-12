@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RecommendedPlaceController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
@@ -34,4 +35,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/export-pdf', [AnalyticsController::class, 'exportPdf'])->name('analytics.export-pdf');
+    Route::get('/analytics/export-csv', [AnalyticsController::class, 'exportCsv'])->name('analytics.export-csv'); // Move this inside the group
+
+    // Logs
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 });

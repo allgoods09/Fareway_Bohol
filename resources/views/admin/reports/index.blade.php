@@ -161,7 +161,7 @@
 
 @push('scripts')
 <script>
-    // Delete single report
+    // Delete single report with toast
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
@@ -169,6 +169,7 @@
                 const form = document.getElementById('delete-form');
                 form.action = `/admin/reports/${id}`;
                 form.submit();
+                // Toast will show after page reload via session flash
             }
         });
     });
@@ -181,24 +182,35 @@
         });
     }
 
-    // Bulk action
+    // Bulk action with toast
     const applyBulkBtn = document.getElementById('apply-bulk');
     if (applyBulkBtn) {
         applyBulkBtn.addEventListener('click', function() {
             const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb => cb.value);
             const action = document.getElementById('bulk-action').value;
+            const actionLabels = {
+                'in_progress': 'In Progress',
+                'resolved': 'Resolved',
+                'rejected': 'Rejected'
+            };
             
             if(selected.length === 0) {
-                alert('Please select at least one report.');
+                showToast('Please select at least one report.', 'warning');
                 return;
             }
             
             if(!action) {
-                alert('Please select an action.');
+                showToast('Please select an action.', 'warning');
                 return;
             }
             
-            if(confirm(`Apply "${action}" to ${selected.length} report(s)?`)) {
+            if(confirm(`Apply "${actionLabels[action]}" to ${selected.length} report(s)?`)) {
+                // Disable button to prevent double submission
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                btn.disabled = true;
+                
                 fetch('{{ route("admin.reports.bulk-update") }}', {
                     method: 'POST',
                     headers: {
@@ -211,8 +223,17 @@
                     })
                 }).then(response => response.json()).then(data => {
                     if(data.success) {
-                        location.reload();
+                        showToast(`${selected.length} report(s) marked as ${actionLabels[action]}`, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('Failed to update reports', 'error');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
                     }
+                }).catch(() => {
+                    showToast('Error updating reports', 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 });
             }
         });

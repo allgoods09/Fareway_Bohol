@@ -1,4 +1,3 @@
-{{-- resources/views/moderator/recommended-places/create.blade.php --}}
 @extends('layouts.moderator')
 
 @section('title', 'Add Recommended Place')
@@ -50,7 +49,22 @@
                 <!-- Location Picker with Map -->
                 <div>
                     <h3 class="text-md font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Location Picker</h3>
-                    <p class="text-sm text-gray-600 mb-3">Click on the map to set the location of this place</p>
+                    
+                    <!-- Search Bar for Panning Only -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search Location</label>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="map-search-input" 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                   placeholder="Search for a location... (e.g., Chocolate Hills, Tagbilaran)" 
+                                   autocomplete="off">
+                            <div id="map-search-suggestions" class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">🔍 Search will only pan the map - click on the map to set coordinates</p>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-3">📍 Click on the map to set the location of this place</p>
                     
                     <!-- Map Container -->
                     <div id="location-map" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200 mb-4"></div>
@@ -128,8 +142,19 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     
+    // Expanded Bohol bounds for panning restriction
+    var boholBounds = L.latLngBounds([
+        [9.30, 123.50],
+        [10.20, 124.80]
+    ]);
+    map.setMaxBounds(boholBounds);
+    map.on('drag', function() {
+        map.panInsideBounds(boholBounds, { animate: false });
+    });
+    
     // Variable to store the marker
     var locationMarker = null;
+    var searchTimeout = null;
     
     // Function to update coordinates when clicking on map
     map.on('click', function(e) {
@@ -149,6 +174,92 @@
         locationMarker = L.marker([lat, lng]).addTo(map);
         locationMarker.bindPopup('<strong>Selected Location</strong><br>Lat: ' + lat + '<br>Lng: ' + lng).openPopup();
     });
+    
+    // Search functionality for panning only
+    function setupMapSearch() {
+        const searchInput = document.getElementById('map-search-input');
+        const suggestionsContainer = document.getElementById('map-search-suggestions');
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 3) {
+                suggestionsContainer.classList.add('hidden');
+                suggestionsContainer.innerHTML = '';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchLocation(query, suggestionsContainer);
+            }, 500);
+        });
+        
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.classList.add('hidden');
+            }
+        });
+    }
+    
+    async function searchLocation(query, suggestionsContainer) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=PH&bounded=1&viewbox=123.5,10.3,124.9,9.2`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                displaySearchSuggestions(data, suggestionsContainer);
+            } else {
+                suggestionsContainer.classList.add('hidden');
+                suggestionsContainer.innerHTML = '';
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            suggestionsContainer.classList.add('hidden');
+        }
+    }
+    
+    function displaySearchSuggestions(results, suggestionsContainer) {
+        suggestionsContainer.innerHTML = '';
+        
+        results.forEach(result => {
+            const item = document.createElement('div');
+            item.className = 'px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
+            item.innerHTML = `
+                <div class="font-medium text-gray-800 text-sm">${result.display_name.split(',')[0]}</div>
+                <div class="text-xs text-gray-500">${result.display_name.split(',').slice(1, 4).join(',')}</div>
+            `;
+            item.addEventListener('click', () => {
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                
+                // PAN ONLY - do NOT set coordinates
+                map.setView([lat, lng], 14);
+                
+                // Clear search input and hide suggestions
+                document.getElementById('map-search-input').value = '';
+                suggestionsContainer.classList.add('hidden');
+                
+                // Show temporary popup to indicate panning
+                L.popup()
+                    .setLatLng([lat, lng])
+                    .setContent('📍 Panned to searched location<br><small>Click on map to set coordinates</small>')
+                    .openOn(map);
+                
+                // Auto-close popup after 3 seconds
+                setTimeout(() => {
+                    map.closePopup();
+                }, 3000);
+            });
+            suggestionsContainer.appendChild(item);
+        });
+        
+        suggestionsContainer.classList.remove('hidden');
+    }
+    
+    // Initialize search
+    setupMapSearch();
     
     // If there are existing coordinates (like from old input), add marker
     var existingLat = document.getElementById('latitude').value;

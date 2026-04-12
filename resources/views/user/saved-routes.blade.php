@@ -81,7 +81,7 @@
                     </div>
                     <h3 class="empty-state-title">No saved routes yet</h3>
                     <p class="empty-state-text">Find a route and click save to bookmark it here.</p>
-                    <a href="{{ route('find-route') }}" class="empty-state-btn">
+                    <a href="{{ route('home') }}" class="empty-state-btn">
                         <i class="fas fa-search"></i> Find a Route
                     </a>
                 </div>
@@ -133,7 +133,7 @@
                     </div>
                     <h3 class="empty-state-title">No saved locations yet</h3>
                     <p class="empty-state-text">Browse tourist spots and save your favorites here.</p>
-                    <a href="{{ route('home') }}" class="empty-state-btn">
+                    <a href="{{ route('user.recommended-places') }}" class="empty-state-btn">
                         <i class="fas fa-map-marked-alt"></i> Browse Places
                     </a>
                 </div>
@@ -195,7 +195,7 @@
     </div>
 </div>
 
-{{-- Location Details Modal --}}
+{{-- Location Details Modal (Simplified - with Image instead of Map) --}}
 <div id="location-modal" class="modal">
     <div class="modal-overlay"></div>
     <div class="modal-container location-modal-container">
@@ -213,15 +213,19 @@
                 <i class="fas fa-spinner fa-spin"></i> Loading details...
             </div>
             <div id="location-modal-content" style="display: none;">
-                <div id="location-modal-map" style="height: 250px; width: 100%; border-radius: 12px; margin-bottom: 20px;"></div>
+                <!-- Location Image -->
+                <div id="location-image-container" class="location-image-container">
+                    <img id="location-image" src="" alt="Location image" class="location-image">
+                </div>
+                
                 <div class="location-details">
                     <div class="detail-row">
                         <span class="detail-label"><i class="fas fa-tag"></i> Name:</span>
                         <span class="detail-value" id="location-detail-name">—</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label"><i class="fas fa-map-pin"></i> Coordinates:</span>
-                        <span class="detail-value" id="location-detail-coords">—</span>
+                        <span class="detail-label"><i class="fas fa-map-pin"></i> Category:</span>
+                        <span class="detail-value" id="location-detail-category">—</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label"><i class="fas fa-align-left"></i> Description:</span>
@@ -626,17 +630,24 @@
     .modal-container {
         position: relative;
         background: var(--white);
-        border-radius: 20px;
+        border-radius: 24px;
         width: 90%;
-        max-width: 700px;
-        max-height: 90vh;
+        max-width: 900px;  /* Changed from 700px to 900px */
+        max-height: 85vh;
         overflow-y: auto;
         z-index: 1001;
         animation: modalSlideIn 0.3s ease;
     }
 
+    #modal-map {
+        height: 400px;  /* Changed from 300px to 400px */
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
     .location-modal-container {
-        max-width: 500px;
+        max-width: 700px;  /* Changed from 500px to 600px */
     }
 
     @keyframes modalSlideIn {
@@ -863,6 +874,33 @@
         background: #0c7a60;
     }
 
+    /* Location Image Styles */
+    .location-image-container {
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--sand);
+    }
+
+    .location-image {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .location-image-placeholder {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #c8e6d8, #a8d4ee);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6aa8c0;
+        font-size: 48px;
+    }
+
     /* Location Details */
     .location-details {
         margin-top: 16px;
@@ -921,13 +959,16 @@
         .tabs {
             justify-content: center;
         }
+        
+        .location-image {
+            height: 160px;
+        }
     }
 </style>
 
 @push('scripts')
 <script>
 let routeModalMap = null;
-let locationModalMap = null;
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -945,12 +986,17 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Delete route/location
 document.querySelectorAll('.delete-route').forEach(btn => {
     btn.addEventListener('click', function() {
-        if(confirm('Delete this saved item?')) {
+        if(confirm('Delete this saved item? This action cannot be undone.')) {
             const id = this.dataset.id;
             fetch(`/user/saved-routes/${id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(() => location.reload());
+            }).then(() => {
+                showToast('Item deleted successfully!', 'success');
+                location.reload();
+            }).catch(() => {
+                showToast('Error deleting item', 'error');
+            });
         }
     });
 });
@@ -994,22 +1040,46 @@ function openRouteModal(originLat, originLng, destLat, destLng, originAddress, d
             document.getElementById('modal-distance').textContent = distanceKm;
             document.getElementById('modal-time').textContent = durationMin;
             
-            if (routeModalMap) routeModalMap.remove();
-            
-            routeModalMap = L.map('modal-map').setView([(originLat + destLat) / 2, (originLng + destLng) / 2], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(routeModalMap);
-            
-            L.geoJSON(route.geometry, { style: { color: '#0c2340', weight: 5 } }).addTo(routeModalMap);
-            
-            const greenIcon = L.divIcon({ html: '<div style="width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #22c55e"></div>', iconSize: [12, 12] });
-            const redIcon = L.divIcon({ html: '<div style="width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #ef4444"></div>', iconSize: [12, 12] });
-            
-            L.marker([originLat, originLng], { icon: greenIcon }).addTo(routeModalMap).bindPopup(`<strong>Origin</strong><br>${originAddress}`);
-            L.marker([destLat, destLng], { icon: redIcon }).addTo(routeModalMap).bindPopup(`<strong>Destination</strong><br>${destAddress}`);
-            
-            routeModalMap.fitBounds(L.latLngBounds([[originLat, originLng], [destLat, destLng]]), { padding: [50, 50] });
+            // Small delay to ensure modal is fully visible before creating map
+            setTimeout(() => {
+                // Clean up existing map if any
+                if (routeModalMap) {
+                    routeModalMap.remove();
+                    routeModalMap = null;
+                }
+                
+                // Create new map
+                routeModalMap = L.map('modal-map').setView([(originLat + destLat) / 2, (originLng + destLng) / 2], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(routeModalMap);
+                
+                // Add route line
+                L.geoJSON(route.geometry, { 
+                    style: { color: '#0c2340', weight: 5, opacity: 0.8 }
+                }).addTo(routeModalMap);
+                
+                // Add markers
+                const greenIcon = L.divIcon({ 
+                    html: '<div style="width:14px;height:14px;background:#22c55e;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #22c55e"></div>', 
+                    iconSize: [14, 14] 
+                });
+                const redIcon = L.divIcon({ 
+                    html: '<div style="width:14px;height:14px;background:#ef4444;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #ef4444"></div>', 
+                    iconSize: [14, 14] 
+                });
+                
+                L.marker([originLat, originLng], { icon: greenIcon }).addTo(routeModalMap).bindPopup(`<strong>Origin</strong><br>${originAddress}`);
+                L.marker([destLat, destLng], { icon: redIcon }).addTo(routeModalMap).bindPopup(`<strong>Destination</strong><br>${destAddress}`);
+                
+                // Fit bounds with padding
+                routeModalMap.fitBounds(L.latLngBounds([[originLat, originLng], [destLat, destLng]]), { padding: [50, 50] });
+                
+                // Invalidate map size to ensure proper rendering
+                setTimeout(() => {
+                    routeModalMap.invalidateSize();
+                }, 100);
+            }, 100);
             
             fetchFares(distanceKm);
             
@@ -1017,11 +1087,12 @@ function openRouteModal(originLat, originLng, destLat, destLng, originAddress, d
             content.style.display = 'block';
         })
         .catch(error => {
-            loading.innerHTML = '<i class="fas fa-exclamation-circle"></i> Could not load route.';
+            console.error('Route error:', error);
+            loading.innerHTML = '<i class="fas fa-exclamation-circle"></i> Could not load route. Please try again.';
         });
 }
 
-// View Location Modal
+// View Location Modal (Simplified - with image)
 document.querySelectorAll('.view-location-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const placeId = this.dataset.id;
@@ -1043,23 +1114,31 @@ function openLocationModal(placeId, placeName, lat, lng) {
     loading.style.display = 'block';
     content.style.display = 'none';
     
-    // Get place details from API or database
+    // Get place details from API
     fetch(`/api/place/${placeId}`)
         .then(res => res.json())
         .then(data => {
             document.getElementById('location-detail-name').textContent = data.name;
-            document.getElementById('location-detail-coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('location-detail-category').textContent = data.category || 'Uncategorized';
             document.getElementById('location-detail-desc').textContent = data.description || 'No description available.';
             
-            if (locationModalMap) locationModalMap.remove();
-            
-            locationModalMap = L.map('location-modal-map').setView([lat, lng], 14);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(locationModalMap);
-            
-            const tealIcon = L.divIcon({ html: '<div style="width:14px;height:14px;background:#0e8a6e;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #0e8a6e"></div>', iconSize: [14, 14] });
-            L.marker([lat, lng], { icon: tealIcon }).addTo(locationModalMap).bindPopup(`<strong>${data.name}</strong>`).openPopup();
+            // Set image
+            const locationImage = document.getElementById('location-image');
+            if (data.image_url) {
+                locationImage.src = data.image_url;
+                locationImage.alt = data.name;
+                locationImage.style.display = 'block';
+            } else {
+                // Show placeholder if no image
+                locationImage.style.display = 'none';
+                const container = document.getElementById('location-image-container');
+                if (!container.querySelector('.location-image-placeholder')) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'location-image-placeholder';
+                    placeholder.innerHTML = '<i class="fas fa-map-marker-alt"></i>';
+                    container.appendChild(placeholder);
+                }
+            }
             
             loading.style.display = 'none';
             content.style.display = 'block';
@@ -1101,13 +1180,21 @@ async function fetchFares(distanceKm) {
 }
 
 function closeRouteModal() {
-    document.getElementById('route-modal').classList.remove('active');
-    if (routeModalMap) { routeModalMap.remove(); routeModalMap = null; }
+    const modal = document.getElementById('route-modal');
+    modal.classList.remove('active');
+    if (routeModalMap) { 
+        routeModalMap.remove(); 
+        routeModalMap = null; 
+    }
+    // Reset loading state for next time
+    const loading = document.getElementById('modal-loading');
+    const content = document.getElementById('modal-content');
+    loading.style.display = 'block';
+    content.style.display = 'none';
 }
 
 function closeLocationModal() {
     document.getElementById('location-modal').classList.remove('active');
-    if (locationModalMap) { locationModalMap.remove(); locationModalMap = null; }
 }
 
 document.querySelectorAll('.modal-overlay').forEach(overlay => {

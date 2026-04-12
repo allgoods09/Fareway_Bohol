@@ -36,7 +36,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @forelse($vehicleTypes as $vehicle)
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors" data-vehicle-id="{{ $vehicle->id }}">
                         <td class="px-6 py-3 text-sm">
                             <i class="{{ $vehicle->icon }} text-2xl text-gray-600"></i>
                         </td>
@@ -92,6 +92,7 @@
 
 @push('scripts')
 <script>
+    // Delete button with toast
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
@@ -100,13 +101,19 @@
                 const form = document.getElementById('delete-form');
                 form.action = `/admin/fare-rates/${id}`;
                 form.submit();
+                // This won't show because the page will reload
+                // Better to handle with session flash after redirect
             }
         });
     });
 
+    // Toggle status with toast
     document.querySelectorAll('.toggle-status').forEach(toggle => {
         toggle.addEventListener('change', function() {
             const id = this.dataset.id;
+            const isActive = this.checked;
+            const vehicleName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+            
             fetch(`/admin/fare-rates/${id}/toggle-status`, {
                 method: 'POST',
                 headers: {
@@ -116,9 +123,16 @@
                 body: JSON.stringify({})
             }).then(response => response.json()).then(data => {
                 if(data.success) {
-                    // Optional: Show a toast notification
-                    console.log('Status updated');
+                    const statusText = isActive ? 'activated' : 'deactivated';
+                    showToast(`${vehicleName} has been ${statusText}`, 'success');
+                } else {
+                    // Revert checkbox if failed
+                    this.checked = !isActive;
+                    showToast('Failed to update status', 'error');
                 }
+            }).catch(() => {
+                this.checked = !isActive;
+                showToast('Failed to update status', 'error');
             });
         });
     });

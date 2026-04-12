@@ -1,21 +1,22 @@
 <?php
+// app/Models/ActivityLog.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RouteSearchLog extends Model
+class ActivityLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'origin_lat', 'origin_lng', 'dest_lat', 'dest_lng',
-        'distance_km', 'duration_minutes', 'fare_estimates'
+        'user_id', 'user_name', 'user_role', 'action', 
+        'entity_type', 'entity_id', 'details', 'ip_address', 'user_agent'
     ];
 
     protected $casts = [
-        'fare_estimates' => 'array',
+        'created_at' => 'datetime',
     ];
 
     public function user()

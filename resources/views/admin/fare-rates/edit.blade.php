@@ -129,7 +129,7 @@
             <!-- Form Actions -->
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-3">
                 <button type="submit" class="px-5 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition">
-                    <i class="fas fa-save mr-2"></i> Update Vehicle Type
+                    <i class="fas fa-save mr-2"></i> Update
                 </button>
                 <a href="{{ route('admin.fare-rates.index') }}" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
                     Cancel
@@ -156,3 +156,15 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    @if(session('success'))
+        showToast('{{ session('success') }}', 'success');
+    @endif
+
+    @if(session('error'))
+        showToast('{{ session('error') }}', 'error');
+    @endif
+</script>
+@endpush

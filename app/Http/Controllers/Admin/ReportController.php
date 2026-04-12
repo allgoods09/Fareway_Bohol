@@ -6,9 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReportStatusUpdated;
+use Illuminate\Support\Facades\Log;
+use App\Traits\LogsActivity;
 
 class ReportController extends Controller
 {
+    use LogsActivity;
+
     public function index(Request $request)
     {
         $status = $request->get('status', 'all');
@@ -31,12 +37,13 @@ class ReportController extends Controller
     }
 
     public function updateStatus(Request $request, Report $report)
-    {
+    { 
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,resolved,rejected',
             'admin_notes' => 'nullable|string',
         ]);
 
+        $oldStatus = $report->status;
         $report->status = $validated['status'];
         $report->admin_notes = $validated['admin_notes'];
         
@@ -47,6 +54,28 @@ class ReportController extends Controller
         
         $report->save();
 
+        // Send email notification if status changed
+        if ($oldStatus !== $report->status && $report->user && $report->user->email) {
+            try {
+                Mail::to($report->user->email)->send(new ReportStatusUpdated($report));
+            } catch (\Exception $e) {
+                // Log error but don't fail the request
+                Log::error('Failed to send email: ' . $e->getMessage());
+            }
+        }
+
+        // Check if request expects JSON (for AJAX requests)
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        $this->logActivity(
+            'update_report',
+            'report',
+            $report->id,
+            "Updated report #{$report->id} status to: {$report->status}"
+        );
+
         return redirect()->route('admin.reports.show', $report)
             ->with('success', 'Report status updated successfully.');
     }
@@ -54,6 +83,15 @@ class ReportController extends Controller
     public function destroy(Report $report)
     {
         $report->delete();
+
+
+        $this->logActivity(
+            'delete_report',
+            'report',
+            $report->id,
+            "Deleted report #{$report->id}"
+        );
+        
         return redirect()->route('admin.reports.index')
             ->with('success', 'Report deleted successfully.');
     }

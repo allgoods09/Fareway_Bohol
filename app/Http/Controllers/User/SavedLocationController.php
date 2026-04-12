@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SavedRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\RecommendedPlace;
 
 class SavedLocationController extends Controller
 {
@@ -39,7 +40,14 @@ class SavedLocationController extends Controller
             'type' => 'recommended_place',
             'recommended_place_id' => $request->place_id
         ]);
+
+        $place = RecommendedPlace::find($request->place_id);
+        $updatedCount = $place->savedRoutes()->count();
         
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'saved_count' => $updatedCount,
+            'message' => 'Location saved successfully'
+        ]);
     }
 }
