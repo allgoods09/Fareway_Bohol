@@ -98,15 +98,17 @@
         </nav>
 
         <div class="px-4 py-4 border-t border-[#2d6a4f]">
-            <div class="bg-amber-900/40 rounded-xl p-3 mb-3">
+            {{-- <div class="bg-amber-900/40 rounded-xl p-3 mb-3">
                 <p class="text-xs text-amber-300 flex items-center gap-1">
                     <i class="fas fa-shield-alt"></i> ⚠ Limited access: You can regulate fares, manage tourist spots, and review reports only.
                 </p>
-            </div>
+            </div> --}}
             <div class="bg-[#2d6a4f] rounded-xl p-3">
                 <p class="text-xs text-gray-400">Logged in as</p>
                 <p class="text-sm font-semibold text-white mt-0.5">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-emerald-300 mt-0.5">Moderator</p>
+                <p class="text-xs text-emerald-300 mt-0.5">
+                    {{ ucwords(auth()->user()->role) }}
+                </p>
                 <form method="POST" action="{{ route('logout') }}" class="mt-2">
                     @csrf
                     <button type="submit" class="text-xs text-red-400 hover:text-red-300 transition flex items-center gap-1">

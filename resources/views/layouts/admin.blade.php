@@ -104,7 +104,9 @@
             <div class="bg-[#243d5c] rounded-xl p-3">
                 <p class="text-xs text-gray-400">Logged in as</p>
                 <p class="text-sm font-semibold text-white mt-0.5">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-teal-400 mt-0.5">Administrator</p>
+                <p class="text-xs text-emerald-300 mt-0.5">
+                    {{ ucwords(auth()->user()->role) }}
+                </p>
                 <form method="POST" action="{{ route('logout') }}" class="mt-3">
                     @csrf
                     <button type="submit" class="text-xs text-red-400 hover:text-red-300 transition flex items-center gap-1">

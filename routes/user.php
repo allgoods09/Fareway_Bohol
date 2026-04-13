@@ -6,6 +6,7 @@ use App\Http\Controllers\User\FindRouteController;
 use App\Http\Controllers\User\RecommendedPlacesController;
 use App\Http\Controllers\User\ReportController;
 
+
 // Public routes (no auth required for browsing)
 Route::get('/find-route', [FindRouteController::class, 'index'])->name('find-route');
 Route::post('/calculate-fares', [FindRouteController::class, 'calculateFares'])

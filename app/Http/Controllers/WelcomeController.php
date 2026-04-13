@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\RecommendedPlace;
 use App\Models\SavedRoute;
 use Illuminate\Support\Facades\Auth;
+use App\Models\VehicleType;
+use App\Models\RouteSearchLog;
 
 class WelcomeController extends Controller
 {
@@ -15,6 +17,9 @@ class WelcomeController extends Controller
             ->latest()
             ->limit(5)
             ->get();
+
+        $vehicleCount = VehicleType::where('is_active', true)->count();
+        $totalRoutesCalculated = RouteSearchLog::count();
         
         // Get saved place IDs for authenticated user
         $savedPlaceIds = [];
@@ -25,6 +30,6 @@ class WelcomeController extends Controller
                 ->toArray();
         }
             
-        return view('welcome', compact('recommendedPlaces', 'savedPlaceIds'));
+        return view('welcome', compact('recommendedPlaces', 'savedPlaceIds', 'vehicleCount', 'totalRoutesCalculated'));
     }
 }

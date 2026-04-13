@@ -2,14 +2,19 @@
 
 @section('title', 'Saved Items')
 
+@section('hero-content')
+<div class="hero-content">
+    <div class="hero-tag">
+        <div class="hero-tag-dot"></div>
+        Your Collection
+    </div>
+    <h1>Saved <span>Items</span></h1>
+    <p>Your bookmarked routes and favorite locations, all in one place</p>
+</div>
+@endsection
+
 @section('content')
 <div class="saved-container">
-    <div class="page-header">
-        <h2 class="page-title">
-            <i class="fas fa-bookmark" style="color: var(--teal);"></i> Saved Items
-        </h2>
-        <p class="page-subtitle">Your bookmarked routes and favorite locations</p>
-    </div>
 
     {{-- Tabs --}}
     <div class="tabs">

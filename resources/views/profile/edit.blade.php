@@ -3,14 +3,19 @@
 
 @section('title', 'Profile Settings')
 
+@section('hero-content')
+<div class="hero-content">
+    <div class="hero-tag">
+        <div class="hero-tag-dot"></div>
+        Account Settings
+    </div>
+    <h1>Profile <span>Settings</span></h1>
+    <p>Manage your account information and security preferences</p>
+</div>
+@endsection
+
 @section('content')
 <div class="profile-container">
-    <div class="profile-header">
-        <h2 class="profile-title">
-            <i class="fas fa-user-circle" style="color: var(--teal);"></i> Profile Settings
-        </h2>
-        <p class="profile-subtitle">Update your account information and password</p>
-    </div>
 
     <div class="profile-grid">
         {{-- Update Profile Information --}}

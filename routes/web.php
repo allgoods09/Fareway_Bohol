@@ -5,12 +5,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\Api\PlaceController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\AboutController;
 
 // Public routes
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
+Route::get('/about', [AboutController::class, 'index'])->name('about');
+
+Route::get('/news', [NewsController::class, 'index'])->name('user.news');
+Route::get('/news/fetch', [NewsController::class, 'fetchNews'])->name('user.news.fetch');
+Route::get('/news/refresh', [NewsController::class, 'refresh'])->name('user.news.refresh');
+
 Route::get('/api/place/{id}', [PlaceController::class, 'show']);
 
 // Authenticated user routes

@@ -1,4 +1,3 @@
-{{-- resources/views/user/recommended-places.blade.php --}}
 @extends('layouts.user')
 
 @section('title', 'Recommended Places')
@@ -142,7 +141,7 @@
         margin-bottom: 24px;
         background: var(--white);
         padding: 20px;
-        border-radius: 16px;
+        border-radius: 8px;  /* Changed from 16px to 8px */
         border: 1px solid var(--border);
     }
     
@@ -165,7 +164,7 @@
         width: 100%;
         padding: 12px 16px 12px 40px;
         border: 1.5px solid var(--border);
-        border-radius: 12px;
+        border-radius: 6px;  /* Changed from 12px to 6px */
         font-size: 14px;
         font-family: 'Poppins', sans-serif;
         transition: all 0.2s;
@@ -174,7 +173,7 @@
     .search-input:focus {
         outline: none;
         border-color: var(--teal);
-        box-shadow: 0 0 0 3px rgba(14,138,110,0.1);
+        box-shadow: 0 0 0 2px rgba(14,138,110,0.1);
     }
     
     .clear-search {
@@ -205,7 +204,7 @@
         flex: 1;
         padding: 12px 16px;
         border: 1.5px solid var(--border);
-        border-radius: 12px;
+        border-radius: 6px;  /* Changed from 12px to 6px */
         font-size: 14px;
         font-family: 'Poppins', sans-serif;
         background: var(--white);
@@ -241,7 +240,7 @@
         padding: 60px 20px;
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 20px;
+        border-radius: 8px;  /* Changed from 20px to 8px */
         margin-top: 20px;
     }
     
@@ -269,7 +268,7 @@
         background: var(--teal);
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;  /* Changed from 10px to 6px */
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -299,14 +298,14 @@
     .place-card {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 8px;  /* Changed from 16px to 8px */
         overflow: hidden;
         transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .place-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        transform: translateY(-2px);  /* Reduced from -4px for subtlety */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);  /* Softer shadow */
     }
 
     .place-img {
@@ -396,7 +395,7 @@
         background: var(--teal-light);
         color: var(--teal);
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;  /* Changed from 10px to 6px */
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -418,7 +417,7 @@
         background: #fef3c7;
         color: #92400e;
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;  /* Changed from 10px to 6px */
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -448,7 +447,7 @@
         background: #f3f4f6;
         color: #9ca3af;
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;  /* Changed from 10px to 6px */
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -525,55 +524,65 @@
     }
     
     // Apply all filters (search, category, sort)
-    function applyFilters() {
-        let filteredCards = [...allCards];
+    // Apply all filters (search, category, sort)
+function applyFilters() {
+    let filteredCards = [...allCards];
+    
+    // Apply search filter
+    if (currentSearchTerm) {
+        filteredCards = filteredCards.filter(card => {
+            const name = card.dataset.name?.toLowerCase() || '';
+            const category = card.dataset.category?.toLowerCase() || '';
+            const description = card.dataset.description?.toLowerCase() || '';
+            return name.includes(currentSearchTerm) || 
+                   category.includes(currentSearchTerm) || 
+                   description.includes(currentSearchTerm);
+        });
         
-        // Apply search filter
-        if (currentSearchTerm) {
-            filteredCards = filteredCards.filter(card => {
-                const name = card.dataset.name?.toLowerCase() || '';
-                const category = card.dataset.category?.toLowerCase() || '';
-                const description = card.dataset.description?.toLowerCase() || '';
-                return name.includes(currentSearchTerm) || 
-                       category.includes(currentSearchTerm) || 
-                       description.includes(currentSearchTerm);
-            });
-            
-            searchStatusSpan.textContent = `Found ${filteredCards.length} result(s) for "${currentSearchTerm}"`;
-        }
-        
-        // Apply category filter
-        if (currentCategory !== 'all') {
-            filteredCards = filteredCards.filter(card => {
-                const category = card.dataset.category || 'Uncategorized';
-                return category === currentCategory;
-            });
-        }
-        
-        // Apply sorting
-        filteredCards = sortCards(filteredCards, currentSort);
-        
-        // Update UI
-        if (filteredCards.length === 0) {
-            placesGrid.innerHTML = '';
-            noResultsDiv.classList.remove('hidden');
-            paginationWrapper.classList.add('hidden');
-        } else {
-            // Re-render filtered cards
-            placesGrid.innerHTML = '';
-            filteredCards.forEach(card => {
-                placesGrid.appendChild(card.cloneNode(true));
-            });
-            noResultsDiv.classList.add('hidden');
-            paginationWrapper.classList.add('hidden');
-            
-            // Re-attach event listeners to new buttons
-            reattachEventListeners();
-        }
-        
-        // Update results count
-        updateResultsCount(filteredCards.length);
+        searchStatusSpan.textContent = `Found ${filteredCards.length} result(s) for "${currentSearchTerm}"`;
     }
+    
+    // Apply category filter
+    if (currentCategory !== 'all') {
+        filteredCards = filteredCards.filter(card => {
+            const category = card.dataset.category || 'Uncategorized';
+            return category === currentCategory;
+        });
+    }
+    
+    // Apply sorting - requires reordering DOM elements
+    if (currentSort !== 'latest') {
+        filteredCards = sortCards(filteredCards, currentSort);
+    }
+    
+    // Update UI - hide all cards first, then show only filtered ones
+    allCards.forEach(card => {
+        card.style.display = 'none';
+    });
+    
+    if (filteredCards.length === 0) {
+        noResultsDiv.classList.remove('hidden');
+        paginationWrapper.classList.add('hidden');
+        placesGrid.style.display = 'none';
+    } else {
+        filteredCards.forEach(card => {
+            card.style.display = 'block';
+        });
+        noResultsDiv.classList.add('hidden');
+        paginationWrapper.classList.add('hidden');
+        placesGrid.style.display = 'grid';
+        
+        // If sorting by name/popularity, reorder the DOM elements
+        if (currentSort !== 'latest') {
+            filteredCards.forEach(card => {
+                placesGrid.appendChild(card);
+            });
+        }
+    }
+    
+    // Update results count
+    updateResultsCount(filteredCards.length);
+}
     
     // Sort cards
     function sortCards(cards, sortType) {
@@ -606,60 +615,70 @@
     }
     
     // Re-attach event listeners to cloned buttons
-    function reattachEventListeners() {
-        // Re-attach route buttons
-        document.querySelectorAll('.btn-route').forEach(btn => {
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            newBtn.addEventListener('click', function() {
-                const lat = parseFloat(this.closest('.place-card').dataset.lat || this.dataset.lat);
-                const lng = parseFloat(this.closest('.place-card').dataset.lng || this.dataset.lng);
-                const name = this.closest('.place-card').querySelector('.place-name')?.textContent || '';
-                setDestinationFromPlace(lat, lng, name);
-            });
-        });
+    // Re-attach event listeners to cloned buttons
+function reattachEventListeners() {
+    // Re-attach route buttons - preserve inline onclick or reattach
+    document.querySelectorAll('.btn-route').forEach(btn => {
+        // Get the place card
+        const card = btn.closest('.place-card');
+        if (!card) return;
         
-        // Re-attach save buttons
-        @auth
-        document.querySelectorAll('.save-place-btn').forEach(btn => {
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            newBtn.addEventListener('click', async function() {
-                const placeId = this.dataset.id;
-                const placeName = this.dataset.name;
-                const placeLat = this.dataset.lat;
-                const placeLng = this.dataset.lng;
-                
-                try {
-                    const response = await fetch('{{ route("user.save-location") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            place_id: placeId,
-                            name: placeName,
-                            latitude: placeLat,
-                            longitude: placeLng
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                        this.classList.add('saved');
-                        this.disabled = true;
-                        showNotification('Location saved!', 'success');
-                    }
-                } catch (error) {
-                    showNotification('Error saving location', 'error');
-                }
-            });
+        const lat = card.dataset.lat;
+        const lng = card.dataset.lng;
+        const name = card.dataset.name;
+        
+        // Remove existing listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // Add fresh click listener
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            setDestinationFromPlace(parseFloat(lat), parseFloat(lng), name);
         });
-        @endauth
-    }
+    });
+    
+    // Re-attach save buttons (keep your existing code)
+    @auth
+    document.querySelectorAll('.save-place-btn').forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', async function() {
+            const placeId = this.dataset.id;
+            const placeName = this.dataset.name;
+            const placeLat = this.dataset.lat;
+            const placeLng = this.dataset.lng;
+            
+            try {
+                const response = await fetch('{{ route("user.save-location") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        place_id: placeId,
+                        name: placeName,
+                        latitude: placeLat,
+                        longitude: placeLng
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                    this.classList.add('saved');
+                    this.disabled = true;
+                    showNotification('Location saved!', 'success');
+                }
+            } catch (error) {
+                showNotification('Error saving location', 'error');
+            }
+        });
+    });
+    @endauth
+}
     
     // Reset search and filters
     function resetSearch() {

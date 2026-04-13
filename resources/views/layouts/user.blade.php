@@ -42,7 +42,10 @@
 
         body {
             font-family: 'Poppins', sans-serif;
+            /* background: var(--sand); */
             background: var(--sand);
+            background-image: radial-gradient(var(--teal) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
             color: var(--text-dark);
             display: flex;
             flex-direction: column;
@@ -56,17 +59,73 @@
             overflow: visible;
             padding-bottom: 60px;
         }
+        
+        /* ADD THIS: Background image container - positioned absolutely behind everything */
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .hero-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .hero-bg-image.active {
+            opacity: 1;
+        }
+        
+        /* Blur effect on background */
+        .hero-bg-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        /* Dark overlay on background only */
+        .hero-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+        
         .hero-dots {
-            position: absolute; inset: 0; opacity: .05;
+            position: absolute; 
+            inset: 0; 
+            opacity: .05;
             background-image: radial-gradient(#fff 1px, transparent 1px);
             background-size: 24px 24px;
+            z-index: 2;
         }
+        
         .hero-inner {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 40px;
             position: relative;
-            z-index: 1;
+            z-index: 10;  /* Higher than background layers */
             overflow: visible;
         }
         
@@ -448,9 +507,22 @@
 
         /* Main Content Container */
         .main-content {
+            position: relative;
             width: 100%;
             padding: 100px 200px 60px;
             flex: 1;
+            background-image: radial-gradient(rgba(14,138,110,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .main-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--teal), var(--teal-light), var(--teal));
         }
 
         /* Footer */
@@ -554,6 +626,241 @@
         .bg-white.rounded-2xl {
             z-index: 1000000 !important;
         }
+
+
+
+
+
+
+
+
+
+                /* Professional Footer Styles */
+        .site-footer {
+            background: linear-gradient(180deg, #0a1a2e 0%, #071526 100%);
+            color: #9ca3af;
+            margin-top: 60px;
+            border-top: 1px solid rgba(52, 211, 153, 0.15);
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 48px 40px 24px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .footer-logo i {
+            font-size: 24px;
+            color: #34d399;
+        }
+
+        .footer-logo span span {
+            color: #34d399;
+        }
+
+        .footer-description {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-link {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--teal);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--teal);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a i {
+            font-size: 10px;
+            color: var(--teal);
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+            transform: translateX(4px);
+        }
+
+        .footer-partners {
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .partners-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .partner-logos {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .partner {
+            font-size: 11px;
+            font-weight: 500;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .partner:hover {
+            color: var(--teal);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .footer-copyright strong {
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        .footer-credit i {
+            margin: 0 4px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-container {
+                padding: 40px 24px 20px;
+            }
+            
+            .footer-grid {
+                gap: 32px;
+            }
+            
+            .footer-partners {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-logo {
+                justify-content: center;
+            }
+            
+            .footer-description {
+                text-align: center;
+            }
+            
+            .footer-social {
+                justify-content: center;
+            }
+            
+            .footer-col h4::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .footer-col h4 {
+                text-align: center;
+            }
+            
+            .footer-links li {
+                text-align: center;
+            }
+            
+            .footer-links a {
+                justify-content: center;
+            }
+        }
     </style>
 
     @stack('styles')
@@ -561,6 +868,16 @@
 <body>
 
 <div class="hero">
+    <!-- ADD THIS: Background image container -->
+    <div class="hero-bg" id="heroBg">
+        <div class="hero-bg-image active" id="bgImage1"></div>
+        <div class="hero-bg-image" id="bgImage2"></div>
+        <div class="hero-bg-image" id="bgImage3"></div>
+        <div class="hero-bg-image" id="bgImage4"></div>
+        <div class="hero-bg-image" id="bgImage5"></div>
+        <div class="hero-bg-overlay"></div>
+    </div>
+    
     <div class="hero-dots"></div>
     <div class="hero-inner">
         {{-- Integrated Navigation --}}
@@ -581,6 +898,9 @@
                 </a>
                 <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
                     <i class="fas fa-info-circle"></i> About
+                </a>
+                <a href="{{ route('user.news') }}" class="nav-link {{ request()->routeIs('user.news') ? 'active' : '' }}">
+                    <i class="fas fa-newspaper"></i> News
                 </a>
                 <a href="{{ route('user.report.create') }}" class="nav-link {{ request()->routeIs('user.report.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i> Report
@@ -625,6 +945,9 @@
                                     <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
                                         <i class="fas fa-shield-alt"></i> Admin Panel
                                     </a>
+                                    <a href="{{ route('moderator.dashboard') }}" class="dropdown-item">
+                                        <i class="fas fa-user-check"></i> Moderator Panel
+                                    </a>
                                 @elseif(Auth::user()->role === 'moderator')
                                     <a href="{{ route('moderator.dashboard') }}" class="dropdown-item">
                                         <i class="fas fa-user-check"></i> Moderator Panel
@@ -664,6 +987,9 @@
                 <a href="{{ route('about') }}" class="mobile-nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
                     <i class="fas fa-info-circle"></i> About
                 </a>
+                <a href="{{ route('user.news') }}" class="mobile-nav-link {{ request()->routeIs('user.news') ? 'active' : '' }}">
+                    <i class="fas fa-newspaper"></i> News
+                </a>
                 <a href="{{ route('user.report.create') }}" class="mobile-nav-link {{ request()->routeIs('user.report.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i> Report
                 </a>
@@ -680,8 +1006,84 @@
     @yield('content')
 </main>
 
-<footer>
-    &copy; {{ date('Y') }} <strong>Fareway Bohol</strong> — Helping you navigate Bohol with ease.
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <!-- Column 1: Brand & Description -->
+            <div class="footer-col">
+                <div class="footer-logo">
+                    <i class="fas fa-bus"></i>
+                    <span>Fareway <span>Bohol</span></span>
+                </div>
+                <p class="footer-description">
+                    Making public transport in Bohol accessible, transparent, and reliable for every commuter and tourist.
+                </p>
+                <div class="footer-social">
+                    <a href="#" onclick="showToast('📘 Facebook: @FareWayBohol', 'info')" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" onclick="showToast('📸 Instagram: @fareway_bohol', 'info')" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" onclick="showToast('🐦 Twitter: @FareWayBohol', 'info')" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" onclick="showToast('📧 Email: support@farewaybohol.com', 'info')" class="social-link"><i class="fab fa-google"></i></a>
+                </div>
+            </div>
+
+            <!-- Column 2: Quick Links -->
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ route('home') }}"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="{{ route('user.recommended-places') }}"><i class="fas fa-chevron-right"></i> Tourist Spots</a></li>
+                    <li><a href="{{ route('about') }}"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="{{ route('user.news') }}"><i class="fas fa-chevron-right"></i> News & Updates</a></li>
+                    <li><a href="{{ route('user.report.create') }}"><i class="fas fa-chevron-right"></i> Report an Issue</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Support & Legal -->
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showToast('📧 Email: support@farewaybohol.com', 'info')"><i class="fas fa-envelope"></i> Support Center</a></li>
+                    <li><a href="#" onclick="showToast('📞 Hotline: (038) 123-4567', 'info')"><i class="fas fa-phone"></i> Hotline: (038) 123-4567</a></li>
+                    <li><a href="#" onclick="showToast('💬 Globe: 0917 123 4567', 'info')"><i class="fas fa-mobile-alt"></i> Globe: 0917 123 4567</a></li>
+                    <li><a href="#" onclick="showToast('💬 Smart: 0998 765 4321', 'info')"><i class="fas fa-mobile-alt"></i> Smart: 0998 765 4321</a></li>
+                    <li><a href="#" onclick="showToast('📍 Capitol Compound, Tagbilaran City, Bohol', 'info')"><i class="fas fa-map-marker-alt"></i> Visit Our Office</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Legal & Policies -->
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showToast('📜 Terms and conditions of using Fareway Bohol', 'info')"><i class="fas fa-file-contract"></i> Terms of Use</a></li>
+                    <li><a href="#" onclick="showToast('🔒 Your privacy is important to us. Read our policy.', 'info')"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                    <li><a href="#" onclick="showToast('🍪 We use cookies to improve your experience', 'info')"><i class="fas fa-cookie-bite"></i> Cookie Policy</a></li>
+                    <li><a href="#" onclick="showToast('♿ Accessibility features available', 'info')"><i class="fas fa-universal-access"></i> Accessibility</a></li>
+                    <li><a href="#" onclick="showToast('📄 Fare rates are updated monthly based on LTFRB guidelines', 'info')"><i class="fas fa-file-invoice"></i> Fare Rate Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Partners Section -->
+        <div class="footer-partners">
+            <span class="partners-label">Partner Agencies:</span>
+            <div class="partner-logos">
+                <a href="https://ptops-ncr.ltfrb.gov.ph/en" target="_blank"><span class="partner">LTFRB</span></a>
+                <a href="https://www.tourism.gov.ph/" target="_blank"><span class="partner">DOT</span></a>
+                <a href="https://bohol.gov.ph/" target="_blank"><span class="partner">LGU Bohol</span></a>
+                <a href="https://www.dpwh.gov.ph/dpwh/" target="_blank"><span class="partner">DPWH</span></a>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="footer-bottom">
+            <div class="footer-copyright">
+                &copy; {{ date('Y') }} <strong>Fareway Bohol</strong>. All rights reserved.
+            </div>
+            <div class="footer-credit">
+                Made with <i class="fas fa-heart" style="color: #ef4444;"></i> for Boholano Commuters
+            </div>
+        </div>
+    </div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -785,6 +1187,116 @@
     
     let confirmCallback = null;
 </script>
+
+@push('scripts')
+<script>
+    // Background image cycling with persistence across page loads
+    (function() {
+        const images = [
+            'https://images.unsplash.com/photo-1546068996-8da61faeceaa?q=80&w=2070&auto=format&fit=crop',
+            'https://plus.unsplash.com/premium_photo-1691675470758-2a20b2be4423?q=80&w=1170&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1591506557489-e8ca407063e7?q=80&w=1171&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1567856764367-b2de2e573f71?q=80&w=1074&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1624709425831-1632d9db9539?q=80&w=1170&auto=format&fit=crop'
+        ];
+        
+        // Wait for DOM to be fully loaded
+        function initHeroBackground() {
+            const bgImages = [
+                document.getElementById('bgImage1'),
+                document.getElementById('bgImage2'),
+                document.getElementById('bgImage3'),
+                document.getElementById('bgImage4'),
+                document.getElementById('bgImage5')
+            ];
+            
+            // Check if elements exist
+            if (!bgImages[0]) {
+                console.warn('Hero background elements not found, retrying...');
+                setTimeout(initHeroBackground, 100);
+                return;
+            }
+            
+            // Set initial images
+            images.forEach((url, index) => {
+                if (bgImages[index]) {
+                    bgImages[index].style.backgroundImage = `url('${url}')`;
+                }
+            });
+            
+            // Get stored data from localStorage
+            const storedIndex = localStorage.getItem('heroImageIndex');
+            const storedTime = localStorage.getItem('heroImageTimestamp');
+            let currentIndex = 0;
+            let intervalId;
+            let isPaused = false;
+            const heroSection = document.querySelector('.hero');
+            
+            // Calculate which image should be active based on elapsed time
+            if (storedIndex !== null && storedTime !== null) {
+                const elapsedSeconds = (Date.now() - parseInt(storedTime)) / 1000;
+                const imagesPassed = Math.floor(elapsedSeconds / 5);
+                currentIndex = (parseInt(storedIndex) + imagesPassed) % images.length;
+                console.log(`Hero bg: Restored from index ${storedIndex}, passed ${imagesPassed} images, now at ${currentIndex}`);
+            } else {
+                currentIndex = 0;
+                console.log('Hero bg: No stored state, starting at 0');
+            }
+            
+            // Activate the correct image
+            bgImages.forEach((img, idx) => {
+                if (idx === currentIndex) {
+                    img.classList.add('active');
+                } else {
+                    img.classList.remove('active');
+                }
+            });
+            
+            function nextImage() {
+                if (isPaused) return;
+                
+                bgImages[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                bgImages[currentIndex].classList.add('active');
+                
+                // Save current state to localStorage
+                localStorage.setItem('heroImageIndex', currentIndex);
+                localStorage.setItem('heroImageTimestamp', Date.now());
+            }
+            
+            function startCycling() {
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(nextImage, 5000);
+            }
+            
+            if (heroSection) {
+                heroSection.addEventListener('mouseenter', () => {
+                    isPaused = true;
+                });
+                
+                heroSection.addEventListener('mouseleave', () => {
+                    isPaused = false;
+                });
+            }
+            
+            startCycling();
+            
+            // Save state before page unload
+            window.addEventListener('beforeunload', () => {
+                localStorage.setItem('heroImageIndex', currentIndex);
+                localStorage.setItem('heroImageTimestamp', Date.now());
+            });
+        }
+        
+        // Start when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initHeroBackground);
+        } else {
+            initHeroBackground();
+        }
+    })();
+</script>
+@endpush
 
 @stack('scripts')
 

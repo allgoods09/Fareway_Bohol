@@ -16,7 +16,7 @@
             <div class="hero-stat-label">Municipalities</div>
         </div>
         <div class="hero-stat">
-            <div class="hero-stat-num">4</div>
+            <div class="hero-stat-num">{{$vehicleCount ?? 0}}</div>
             <div class="hero-stat-label">Vehicle Types</div>
         </div>
         <div class="hero-stat">
@@ -164,7 +164,7 @@
     </div>
 @endauth
 
-{{-- Popular Places Section - Enhanced to match recommended places --}}
+{{-- Popular Places Section - Professional Styling --}}
 <div class="places-section">
     <div class="places-header">
         <h2 class="section-title">Top 5 <span>Tourist Spots</span> in Bohol</h2>
@@ -249,7 +249,7 @@
         flex: 1;
         padding: 11px 14px;
         border: 1.5px solid var(--border);
-        border-radius: 9px;
+        border-radius: 8px;
         font-size: 13px;
         font-family: 'Poppins', sans-serif;
         background: var(--white);
@@ -259,7 +259,7 @@
     .search-input:focus {
         outline: none;
         border-color: var(--teal);
-        box-shadow: 0 0 0 3px rgba(14,138,110,0.1);
+        box-shadow: 0 0 0 2px rgba(14,138,110,0.1);
     }
     
     .map-picker-btn {
@@ -267,7 +267,7 @@
         height: 40px;
         background: var(--sand);
         border: 1.5px solid var(--border);
-        border-radius: 9px;
+        border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s;
         display: flex;
@@ -289,7 +289,7 @@
         right: 40px;
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 9px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         max-height: 250px;
         overflow-y: auto;
@@ -375,7 +375,7 @@
         right: 0;
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         max-height: 250px;
         overflow-y: auto;
@@ -435,7 +435,7 @@
     
     .overlay-content {
         background: var(--white);
-        border-radius: 24px;
+        border-radius: 12px;
         overflow: hidden;
         animation: slideUp 0.3s ease;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -515,7 +515,7 @@
         flex: 1;
         width: 100%;
         min-height: 300px;
-        border-radius: 16px;
+        border-radius: 12px;
         border: 1.5px solid var(--border);
         margin-bottom: 16px;
         overflow: hidden;
@@ -525,7 +525,7 @@
         font-size: 13px;
         padding: 10px 12px;
         background: var(--sand);
-        border-radius: 10px;
+        border-radius: 8px;
         color: var(--text-muted);
         flex-shrink: 0;
     }
@@ -546,7 +546,7 @@
     
     .overlay-btn {
         padding: 12px 28px;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
@@ -655,13 +655,13 @@
     #map {
         height: 500px;
         width: 100%;
-        border-radius: 16px;
+        border-radius: 12px;
     }
     
     .map-panel {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
     }
     
@@ -690,7 +690,7 @@
     .results-header {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 12px;
         padding: 20px 24px;
         margin-bottom: 20px;
         display: flex;
@@ -771,7 +771,7 @@
     .vehicle-card {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
         transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -859,7 +859,7 @@
         background: #f59e0b;
         color: #fff;
         border: none;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 14px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -880,7 +880,7 @@
         padding: 14px;
         background: var(--sand);
         border: 1px solid var(--border);
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 13px;
         color: var(--text-muted);
     }
@@ -893,7 +893,7 @@
     .card {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
     }
     
@@ -951,7 +951,7 @@
         padding: 11px 14px;
         background: var(--sand);
         border: 1.5px solid var(--border);
-        border-radius: 9px;
+        border-radius: 8px;
         margin-bottom: 18px;
     }
     
@@ -973,7 +973,7 @@
         background: var(--navy);
         color: #fff;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         font-size: 14px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -1013,7 +1013,7 @@
         color: var(--text-dark);
     }
     
-    /* Enhanced Places Section - Matching recommended places */
+    /* Enhanced Places Section - Professional Style */
     .places-section {
         margin-top: 48px;
     }
@@ -1035,34 +1035,35 @@
         gap: 24px;
     }
     
+    /* Professional Card Style - Minimal rounding, subtle elevation */
     .place-card-enhanced {
         background: var(--white);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 8px;
         overflow: hidden;
         transition: transform 0.2s, box-shadow 0.2s;
     }
     
     .place-card-enhanced:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
     
     .place-img-enhanced {
         width: 100%;
-        height: 200px;
+        height: 180px;
         object-fit: cover;
     }
     
     .place-img-fallback-enhanced {
         width: 100%;
-        height: 200px;
+        height: 180px;
         background: linear-gradient(135deg, #c8e6d8, #a8d4ee);
         display: flex;
         align-items: center;
         justify-content: center;
         color: #6aa8c0;
-        font-size: 48px;
+        font-size: 42px;
     }
     
     .place-body-enhanced {
@@ -1100,7 +1101,7 @@
         font-size: 13px;
         color: var(--text-mid);
         line-height: 1.55;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
     }
     
     .place-stats-enhanced {
@@ -1135,7 +1136,7 @@
         background: var(--teal-light);
         color: var(--teal);
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -1157,7 +1158,7 @@
         background: #fef3c7;
         color: #92400e;
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
@@ -1187,7 +1188,7 @@
         background: #f3f4f6;
         color: #9ca3af;
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;
         font-size: 13px;
         font-weight: 600;
         font-family: 'Poppins', sans-serif;
