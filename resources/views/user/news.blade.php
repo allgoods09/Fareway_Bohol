@@ -22,7 +22,7 @@
         </div>
         <div class="news-meta-bar">
             <span><i class="far fa-clock"></i> Last updated: <span id="last-updated">{{ $lastUpdated->format('F j, Y g:i A') }}</span></span>
-            <span class="api-note">📡 Free API • 12-hour delay</span>
+            <span class="api-note">📡 Powered by GNews</span>
             <button id="refresh-news-btn" class="refresh-link"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
     </div>

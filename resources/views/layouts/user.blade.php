@@ -965,7 +965,7 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="btn-nav-login">Login</a>
-                    <a href="{{ route('register') }}" class="btn-nav-register">
+                    <a href="{{ route('register') }}" class="btn-nav-register" style="margin-left: 12px;">
                         <i class="fas fa-user-plus"></i> Sign Up
                     </a>
                 @endauth
