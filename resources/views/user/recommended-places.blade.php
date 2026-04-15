@@ -111,7 +111,7 @@
                             {{ $isSaved ? 'Saved' : 'Save' }}
                         </button>
                     @else
-                        <button class="btn-save-place-disabled" onclick="showLoginMessage()">
+                        <button class="btn-save-place-disabled" onclick="showToast('Please login to save locations', 'info');">
                             <i class="fas fa-lock"></i> Save
                         </button>
                     @endauth
@@ -758,10 +758,6 @@ document.querySelectorAll('.save-place-btn').forEach(btn => {
         setTimeout(() => notification.remove(), 3000);
     }
     @endauth
-
-    function showLoginMessage() {
-        showNotification('Please login to save locations', 'info');
-    }
 </script>
 @endpush
 @endsection

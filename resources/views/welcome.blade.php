@@ -159,7 +159,7 @@
         <i class="far fa-bookmark"></i> Save This Route
     </button>
 @else
-    <div class="login-note" id="login-note" style="display: none;">
+    <div class="login-note" id="login-note" style="display: none;" onclick="showToast('Please login to save locations', 'info');">
         <i class="fas fa-lock"></i> Login to save routes
     </div>
 @endauth
@@ -882,6 +882,10 @@
         border-radius: 8px;
         font-size: 13px;
         color: var(--text-muted);
+    }
+
+    .login-note:hover {
+        cursor: pointer;
     }
     
     .login-note i {
