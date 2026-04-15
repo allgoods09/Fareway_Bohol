@@ -7,6 +7,7 @@ use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\User\SavedLocationController;
 
 // Public routes
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
@@ -31,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Save location
     Route::post('/user/save-location', [App\Http\Controllers\User\SavedLocationController::class, 'save'])->name('user.save-location');
+    Route::post('/toggle-bookmark', [App\Http\Controllers\User\SavedLocationController::class, 'toggle'])->name('user.toggle-bookmark');
 });
 
 Route::get('/api/user/report/{id}', [ReportController::class, 'getReportApi'])->middleware('auth');

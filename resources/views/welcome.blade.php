@@ -219,8 +219,7 @@
                                 data-id="{{ $place->id }}"
                                 data-name="{{ addslashes($place->name) }}"
                                 data-lat="{{ $place->latitude }}"
-                                data-lng="{{ $place->longitude }}"
-                                {{ $isSaved ? 'disabled' : '' }}>
+                                data-lng="{{ $place->longitude }}">
                             <i class="fas fa-bookmark"></i> 
                             {{ $isSaved ? 'Saved' : 'Save' }}
                         </button>
@@ -1860,18 +1859,29 @@
     });
     @endauth
     
-    // Save place button handlers for enhanced cards
+    // Save place button handlers for enhanced cards - TOGGLE VERSION
     document.querySelectorAll('.save-place-btn').forEach(btn => {
-        if (btn.disabled) return;
+        // Remove any existing disabled attribute
+        btn.disabled = false;
         
-        btn.addEventListener('click', async function() {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            // Prevent double clicks
+            if (this.disabled) return;
+            this.disabled = true;
+            
             const placeId = this.dataset.id;
             const placeName = this.dataset.name;
             const placeLat = this.dataset.lat;
             const placeLng = this.dataset.lng;
+            const wasSaved = this.classList.contains('saved');
+            const originalText = this.innerHTML;
+            
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
             
             try {
-                const response = await fetch('{{ route("user.save-location") }}', {
+                const response = await fetch('{{ route("user.toggle-bookmark") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1888,23 +1898,42 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                    this.classList.add('saved');
-                    this.disabled = true;
-                    
                     const card = this.closest('.place-card-enhanced, .place-card');
                     const savesSpan = card.querySelector('.place-stats-item-enhanced:last-child span, .place-stats-item:last-child span');
+                    
+                    if (data.action === 'saved') {
+                        this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                        this.classList.add('saved');
+                        showToast('Location saved!', 'success');
+                    } else {
+                        this.innerHTML = '<i class="fas fa-bookmark"></i> Save';
+                        this.classList.remove('saved');
+                        showToast('Location removed from saved', 'info');
+                    }
+                    
                     if (savesSpan && data.saved_count !== undefined) {
                         savesSpan.textContent = data.saved_count;
                     }
-                    
-                    showToast('Location saved!', 'success');
-                } else if (data.message === 'Location already saved') {
-                    showToast('Location already saved', 'warning');
+                } else {
+                    this.innerHTML = originalText;
+                    if (wasSaved) {
+                        this.classList.add('saved');
+                    } else {
+                        this.classList.remove('saved');
+                    }
+                    showToast(data.message || 'Error', 'error');
                 }
             } catch (error) {
-                console.error('Error saving place:', error);
+                console.error('Error:', error);
+                this.innerHTML = originalText;
+                if (wasSaved) {
+                    this.classList.add('saved');
+                } else {
+                    this.classList.remove('saved');
+                }
                 showToast('Error saving location', 'error');
+            } finally {
+                this.disabled = false;
             }
         });
     });

@@ -617,30 +617,32 @@ function applyFilters() {
         }
     }
     
-// Re-attach save buttons
+// Re-attach save buttons - TOGGLE VERSION using your new route
 @auth
 document.querySelectorAll('.save-place-btn').forEach(btn => {
+    btn.disabled = false;
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
     
-    // Get data from the card, not the button
     const card = newBtn.closest('.place-card');
     const placeId = card.dataset.id;
     const placeName = card.dataset.name;
     const placeLat = card.dataset.lat;
     const placeLng = card.dataset.lng;
     
-    console.log('Save button attached for:', placeName, 'ID:', placeId); // DEBUG
-    
-    newBtn.addEventListener('click', async function() {
-        console.log('Save clicked for:', placeName, 'ID:', placeId); // DEBUG
+    newBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
         
+        // Prevent double clicks
+        if (this.disabled) return;
         this.disabled = true;
+        
         const originalText = this.innerHTML;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        const wasSaved = this.classList.contains('saved');
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
         
         try {
-            const response = await fetch('{{ route("user.save-location") }}', {
+            const response = await fetch('{{ route("user.toggle-bookmark") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -655,27 +657,43 @@ document.querySelectorAll('.save-place-btn').forEach(btn => {
             });
             
             const data = await response.json();
-            console.log('Save response:', data); // DEBUG
             
             if (data.success) {
-                this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                this.classList.add('saved');
-                showNotification('Location saved!', 'success');
+                if (data.action === 'saved') {
+                    this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                    this.classList.add('saved');
+                    showNotification('Location saved!', 'success');
+                } else {
+                    this.innerHTML = '<i class="fas fa-bookmark"></i> Save';
+                    this.classList.remove('saved');
+                    showNotification('Location removed from saved', 'info');
+                }
                 
+                // Update the save count display
                 const savesSpan = card.querySelector('.place-stats-item:last-child span');
                 if (savesSpan && data.saved_count !== undefined) {
                     savesSpan.textContent = data.saved_count;
                 }
             } else {
                 this.innerHTML = originalText;
-                this.disabled = false;
-                showNotification(data.message || 'Error saving location', 'error');
+                if (wasSaved) {
+                    this.classList.add('saved');
+                } else {
+                    this.classList.remove('saved');
+                }
+                showNotification(data.message || 'Error', 'error');
             }
         } catch (error) {
-            console.error('Error saving place:', error);
+            console.error('Error:', error);
             this.innerHTML = originalText;
-            this.disabled = false;
+            if (wasSaved) {
+                this.classList.add('saved');
+            } else {
+                this.classList.remove('saved');
+            }
             showNotification('Error saving location', 'error');
+        } finally {
+            this.disabled = false;
         }
     });
 });

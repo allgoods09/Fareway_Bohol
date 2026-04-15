@@ -50,4 +50,57 @@ class SavedLocationController extends Controller
             'message' => 'Location saved successfully'
         ]);
     }
+    
+    // ADD THIS NEW METHOD FOR TOGGLE (SAVE/UNSAVE)
+    public function toggle(Request $request)
+    {
+        $request->validate([
+            'place_id' => 'required|exists:recommended_places,id',
+            'name' => 'required|string',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric'
+        ]);
+        
+        $userId = Auth::id();
+        $placeId = $request->place_id;
+        
+        // Check if already saved
+        $existing = SavedRoute::where('user_id', $userId)
+            ->where('recommended_place_id', $placeId)
+            ->where('type', 'recommended_place')
+            ->first();
+        
+        if ($existing) {
+            // UNSAVE - delete it
+            $existing->delete();
+            $action = 'unsaved';
+            $message = 'Location removed from saved';
+        } else {
+            // SAVE - create new
+            SavedRoute::create([
+                'user_id' => $userId,
+                'name' => $request->name,
+                'origin_lat' => 0,
+                'origin_lng' => 0,
+                'dest_lat' => $request->latitude,
+                'dest_lng' => $request->longitude,
+                'dest_address' => $request->name,
+                'type' => 'recommended_place',
+                'recommended_place_id' => $placeId
+            ]);
+            $action = 'saved';
+            $message = 'Location saved successfully';
+        }
+        
+        // Get updated count for this place
+        $place = RecommendedPlace::find($placeId);
+        $updatedCount = $place->savedRoutes()->count();
+        
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'saved_count' => $updatedCount,
+            'message' => $message
+        ]);
+    }
 }
