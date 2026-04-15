@@ -96,6 +96,9 @@
                     <i class="fas fa-search-location"></i> Search or use map picker
                 </div>
                 <div class="map-hint">
+                    <span class="tip-text"> Quick Tips <i class="fas fa-mouse-pointer"></i> : <strong>Left-click</strong> = Origin | <strong>Right-click</strong> = Destination</span>
+                </div>
+                <div class="map-hint">
                     <i class="fas fa-map-marker-alt text-green-500"></i> Origin
                 </div>
                 <div class="map-hint">
@@ -1274,6 +1277,80 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+
+    // LEFT CLICK - Set Origin (instant marker, then load name)
+    map.on('click', function(e) {
+        // Set marker and coordinates IMMEDIATELY
+        originLat = e.latlng.lat;
+        originLng = e.latlng.lng;
+        originSet = true;
+        
+        if (originMarker) map.removeLayer(originMarker);
+        originMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: greenIcon }).addTo(map);
+        
+        // Set temporary coordinates in input while loading
+        const tempAddress = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+        document.getElementById('origin-input').value = tempAddress;
+        document.getElementById('origin-address').value = tempAddress;
+        document.getElementById('origin-lat').value = e.latlng.lat;
+        document.getElementById('origin-lng').value = e.latlng.lng;
+        
+        checkReady();
+        showToast('📍 Origin set! Loading location name...', 'success');
+        
+        // Fetch actual address in background
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&zoom=18`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.display_name) {
+                    const fullAddress = data.display_name;
+                    const shortName = fullAddress.split(',')[0];
+                    document.getElementById('origin-input').value = shortName;
+                    document.getElementById('origin-address').value = fullAddress;
+                    showToast('📍 Origin location name loaded!', 'success');
+                }
+            })
+            .catch(error => console.error('Reverse geocoding error:', error));
+    });
+
+    // RIGHT CLICK - Set Destination (instant marker, then load name)
+    map.on('contextmenu', function(e) {
+        if (e.originalEvent) {
+            e.originalEvent.preventDefault();
+        }
+        
+        // Set marker and coordinates IMMEDIATELY
+        destLat = e.latlng.lat;
+        destLng = e.latlng.lng;
+        destSet = true;
+        
+        if (destMarker) map.removeLayer(destMarker);
+        destMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: redIcon }).addTo(map);
+        
+        // Set temporary coordinates in input while loading
+        const tempAddress = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
+        document.getElementById('dest-input').value = tempAddress;
+        document.getElementById('dest-address').value = tempAddress;
+        document.getElementById('dest-lat').value = e.latlng.lat;
+        document.getElementById('dest-lng').value = e.latlng.lng;
+        
+        checkReady();
+        showToast('🏁 Destination set! Loading location name...', 'success');
+        
+        // Fetch actual address in background
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&zoom=18`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.display_name) {
+                    const fullAddress = data.display_name;
+                    const shortName = fullAddress.split(',')[0];
+                    document.getElementById('dest-input').value = shortName;
+                    document.getElementById('dest-address').value = fullAddress;
+                    showToast('🏁 Destination location name loaded!', 'success');
+                }
+            })
+            .catch(error => console.error('Reverse geocoding error:', error));
+    });
     
     const greenIcon = L.divIcon({
         html: '<div style="width:13px;height:13px;background:#22c55e;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25)"></div>',
@@ -1422,7 +1499,7 @@
     }
     
     // Set Origin from Search - WITH MAP PANNING
-    function setOriginFromSearch(lat, lng, address) {
+    function setOriginFromSearch(lat, lng, address, pan = true) {
         originLat = lat;
         originLng = lng;
         originSet = true;
@@ -1435,14 +1512,16 @@
         document.getElementById('origin-lat').value = lat;
         document.getElementById('origin-lng').value = lng;
         
-        map.setView([lat, lng], 14);
+        if (pan) {
+            map.setView([lat, lng], 14);
+        }
         
         checkReady();
         showToast('Origin set!', 'success');
     }
     
     // Set Destination from Search - WITH MAP PANNING
-    function setDestinationFromSearch(lat, lng, address) {
+    function setDestinationFromSearch(lat, lng, address, pan = true) {
         destLat = lat;
         destLng = lng;
         destSet = true;
@@ -1455,7 +1534,9 @@
         document.getElementById('dest-lat').value = lat;
         document.getElementById('dest-lng').value = lng;
         
-        map.setView([lat, lng], 14);
+        if (pan) {
+            map.setView([lat, lng], 14);
+        }
         
         checkReady();
         showToast('Destination set!', 'success');
@@ -1629,6 +1710,10 @@
             setDestinationFromSearch(parseFloat(destLat), parseFloat(destLng), decodedName);
             map.setView([parseFloat(destLat), parseFloat(destLng)], 13);
             showToast(`Destination set to ${decodedName}!`, 'success');
+            
+            // Remove the parameters from URL without refreshing the page
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
         }
     }
     
