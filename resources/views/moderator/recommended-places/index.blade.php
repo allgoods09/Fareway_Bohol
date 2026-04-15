@@ -1,4 +1,3 @@
-{{-- resources/views/moderator/recommended-places/index.blade.php --}}
 @extends('layouts.moderator')
 
 @section('title', 'Recommended Places')
@@ -15,6 +14,57 @@
            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition shadow-sm">
             <i class="fas fa-plus"></i> Add Place
         </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+        <form method="GET" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Search</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                       placeholder="Search by name..." 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            </div>
+            
+            <div class="w-48">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="all">All Categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="all">All</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Sort By</label>
+                <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
+                    <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name (A-Z)</option>
+                    <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name (Z-A)</option>
+                    <option value="most_saved" {{ request('sort') == 'most_saved' ? 'selected' : '' }}>Most Saved</option>
+                </select>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{{ route('moderator.recommended-places.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- Places Table -->

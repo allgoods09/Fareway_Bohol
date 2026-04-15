@@ -21,13 +21,39 @@ class ReportController extends Controller
         
         $query = Report::with(['user', 'resolver']);
         
+        // Filter by status
         if ($status !== 'all') {
             $query->where('status', $status);
         }
         
-        $reports = $query->latest()->paginate(15);
+        // Filter by type
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
         
-        return view('admin.reports.index', compact('reports', 'status'));
+        // Search by user name or email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            })->orWhere('description', 'like', "%{$search}%");
+        }
+        
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        
+        $reports = $query->latest()->paginate(15)->withQueryString();
+        
+        // Get unique report types for filter dropdown
+        $reportTypes = Report::distinct()->pluck('type');
+        
+        return view('admin.reports.index', compact('reports', 'status', 'reportTypes'));
     }
 
     public function show(Report $report)
@@ -59,7 +85,6 @@ class ReportController extends Controller
             try {
                 Mail::to($report->user->email)->send(new ReportStatusUpdated($report));
             } catch (\Exception $e) {
-                // Log error but don't fail the request
                 Log::error('Failed to send email: ' . $e->getMessage());
             }
         }
@@ -83,7 +108,6 @@ class ReportController extends Controller
     public function destroy(Report $report)
     {
         $report->delete();
-
 
         $this->logActivity(
             'delete_report',

@@ -12,12 +12,56 @@ class RecommendedPlaceController extends Controller
 
     use LogsActivity;
 
-    public function index()
+    public function index(Request $request)
     {
-        $places = RecommendedPlace::latest()->paginate(10);
-        return view('admin.recommended-places.index', compact('places'));
+        $query = RecommendedPlace::query();
+        
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        
+        // Filter by category
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+        
+        // Filter by status
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('is_active', $request->status === 'active');
+        }
+        
+        // Sort options
+        switch ($request->get('sort', 'latest')) {
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'most_saved':
+                $query->withCount('savedRoutes')->orderBy('saved_routes_count', 'desc');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+        
+        $places = $query->paginate(10)->withQueryString();
+        
+        // Get unique categories for filter dropdown
+        $categories = RecommendedPlace::whereNotNull('category')
+            ->distinct()
+            ->pluck('category');
+        
+        return view('admin.recommended-places.index', compact('places', 'categories'));
     }
 
+    // Rest of your methods remain the same...
     public function create()
     {
         return view('admin.recommended-places.create');
@@ -33,8 +77,6 @@ class RecommendedPlaceController extends Controller
             'image_url' => 'nullable|url',
             'category' => 'nullable|string',
         ]);
-
-        RecommendedPlace::create($validated);
 
         $place = RecommendedPlace::create($validated);
         

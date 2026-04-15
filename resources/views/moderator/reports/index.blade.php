@@ -1,4 +1,3 @@
-{{-- resources/views/moderator/reports/index.blade.php --}}
 @extends('layouts.moderator')
 
 @section('title', 'User Reports')
@@ -11,29 +10,85 @@
         <p class="text-gray-500 text-sm mt-1">Review and manage user feedback and issue reports</p>
     </div>
 
-    <!-- Status Filter Tabs -->
+    <!-- Advanced Filters Bar -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+        <form method="GET" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Search</label>
+                <input type="text" name="search" value="{{ request('search') }}" 
+                       placeholder="User name, email, or description..." 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>All Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                </select>
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="all">All Types</option>
+                    @foreach($reportTypes as $type)
+                        <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>
+                            {{ str_replace('_', ' ', ucfirst($type)) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Date From</label>
+                <input type="date" name="date_from" value="{{ request('date_from') }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            </div>
+            
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Date To</label>
+                <input type="date" name="date_to" value="{{ request('date_to') }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{{ route('moderator.reports.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Status Filter Tabs (Quick Filter) -->
     <div class="flex flex-wrap gap-2 mb-6">
-        <a href="{{ route('moderator.reports.index', ['status' => 'all']) }}" 
+        <a href="{{ route('moderator.reports.index', array_merge(request()->except('status'), ['status' => 'all'])) }}" 
            class="px-4 py-2 rounded-lg text-sm font-medium transition-all
                   {{ $status == 'all' ? 'bg-gray-800 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
             All
         </a>
-        <a href="{{ route('moderator.reports.index', ['status' => 'pending']) }}" 
+        <a href="{{ route('moderator.reports.index', array_merge(request()->except('status'), ['status' => 'pending'])) }}" 
            class="px-4 py-2 rounded-lg text-sm font-medium transition-all
                   {{ $status == 'pending' ? 'bg-amber-500 text-white shadow' : 'bg-amber-50 text-amber-700 hover:bg-amber-100' }}">
             Pending
         </a>
-        <a href="{{ route('moderator.reports.index', ['status' => 'in_progress']) }}" 
+        <a href="{{ route('moderator.reports.index', array_merge(request()->except('status'), ['status' => 'in_progress'])) }}" 
            class="px-4 py-2 rounded-lg text-sm font-medium transition-all
                   {{ $status == 'in_progress' ? 'bg-blue-500 text-white shadow' : 'bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
             In Progress
         </a>
-        <a href="{{ route('moderator.reports.index', ['status' => 'resolved']) }}" 
+        <a href="{{ route('moderator.reports.index', array_merge(request()->except('status'), ['status' => 'resolved'])) }}" 
            class="px-4 py-2 rounded-lg text-sm font-medium transition-all
                   {{ $status == 'resolved' ? 'bg-emerald-500 text-white shadow' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
             Resolved
         </a>
-        <a href="{{ route('moderator.reports.index', ['status' => 'rejected']) }}" 
+        <a href="{{ route('moderator.reports.index', array_merge(request()->except('status'), ['status' => 'rejected'])) }}" 
            class="px-4 py-2 rounded-lg text-sm font-medium transition-all
                   {{ $status == 'rejected' ? 'bg-red-500 text-white shadow' : 'bg-red-50 text-red-700 hover:bg-red-100' }}">
             Rejected
@@ -60,8 +115,8 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-3 text-sm font-medium text-gray-900">#{{ $report->id }}</td>
                         <td class="px-6 py-3">
-                            <div class="text-sm font-medium text-gray-900">{{ $report->user->name }}</div>
-                            <div class="text-xs text-gray-500">{{ $report->user->email }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $report->user->name ?? 'Guest' }}</div>
+                            <div class="text-xs text-gray-500">{{ $report->user->email ?? 'No email' }}</div>
                         </td>
                         <td class="px-6 py-3 text-sm">
                             @php
