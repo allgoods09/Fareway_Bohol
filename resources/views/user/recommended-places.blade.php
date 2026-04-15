@@ -60,10 +60,13 @@
     <div class="places-grid" id="places-grid">
         @foreach($places as $place)
         <div class="place-card" 
-             data-name="{{ $place->name }}" 
-             data-saved="{{ $place->saved_routes_count ?? 0 }}"
-             data-category="{{ $place->category ?? 'Uncategorized' }}"
-             data-description="{{ $place->description }}">
+        data-id="{{ $place->id }}"
+        data-name="{{ $place->name }}" 
+        data-lat="{{ $place->latitude }}"
+        data-lng="{{ $place->longitude }}"
+        data-saved="{{ $place->saved_routes_count ?? 0 }}"
+        data-category="{{ $place->category ?? 'Uncategorized' }}"
+        data-description="{{ $place->description }}">
             @if($place->image_url)
                 <img src="{{ $place->image_url }}" alt="{{ $place->name }}" class="place-img">
             @else
@@ -614,71 +617,69 @@ function applyFilters() {
         }
     }
     
-    // Re-attach event listeners to cloned buttons
-    // Re-attach event listeners to cloned buttons
-function reattachEventListeners() {
-    // Re-attach route buttons - preserve inline onclick or reattach
-    document.querySelectorAll('.btn-route').forEach(btn => {
-        // Get the place card
-        const card = btn.closest('.place-card');
-        if (!card) return;
-        
-        const lat = card.dataset.lat;
-        const lng = card.dataset.lng;
-        const name = card.dataset.name;
-        
-        // Remove existing listeners by cloning
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        
-        // Add fresh click listener
-        newBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            setDestinationFromPlace(parseFloat(lat), parseFloat(lng), name);
-        });
-    });
+// Re-attach save buttons
+@auth
+document.querySelectorAll('.save-place-btn').forEach(btn => {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
     
-    // Re-attach save buttons (keep your existing code)
-    @auth
-    document.querySelectorAll('.save-place-btn').forEach(btn => {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', async function() {
-            const placeId = this.dataset.id;
-            const placeName = this.dataset.name;
-            const placeLat = this.dataset.lat;
-            const placeLng = this.dataset.lng;
+    // Get data from the card, not the button
+    const card = newBtn.closest('.place-card');
+    const placeId = card.dataset.id;
+    const placeName = card.dataset.name;
+    const placeLat = card.dataset.lat;
+    const placeLng = card.dataset.lng;
+    
+    console.log('Save button attached for:', placeName, 'ID:', placeId); // DEBUG
+    
+    newBtn.addEventListener('click', async function() {
+        console.log('Save clicked for:', placeName, 'ID:', placeId); // DEBUG
+        
+        this.disabled = true;
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        try {
+            const response = await fetch('{{ route("user.save-location") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    place_id: placeId,
+                    name: placeName,
+                    latitude: placeLat,
+                    longitude: placeLng
+                })
+            });
             
-            try {
-                const response = await fetch('{{ route("user.save-location") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        place_id: placeId,
-                        name: placeName,
-                        latitude: placeLat,
-                        longitude: placeLng
-                    })
-                });
+            const data = await response.json();
+            console.log('Save response:', data); // DEBUG
+            
+            if (data.success) {
+                this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                this.classList.add('saved');
+                showNotification('Location saved!', 'success');
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    this.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                    this.classList.add('saved');
-                    this.disabled = true;
-                    showNotification('Location saved!', 'success');
+                const savesSpan = card.querySelector('.place-stats-item:last-child span');
+                if (savesSpan && data.saved_count !== undefined) {
+                    savesSpan.textContent = data.saved_count;
                 }
-            } catch (error) {
-                showNotification('Error saving location', 'error');
+            } else {
+                this.innerHTML = originalText;
+                this.disabled = false;
+                showNotification(data.message || 'Error saving location', 'error');
             }
-        });
+        } catch (error) {
+            console.error('Error saving place:', error);
+            this.innerHTML = originalText;
+            this.disabled = false;
+            showNotification('Error saving location', 'error');
+        }
     });
-    @endauth
-}
+});
+@endauth
     
     // Reset search and filters
     function resetSearch() {
