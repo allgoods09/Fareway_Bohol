@@ -48,6 +48,6 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         // Redirect to user dashboard after registration
-        return redirect(route('user.dashboard'));
+        return redirect(route('home'));
     }
 }
