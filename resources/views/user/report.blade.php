@@ -76,13 +76,13 @@
                 <input type="hidden" id="dest_address" name="dest_info">
             </div>
 
-            <div class="form-group">
+            {{-- <div class="form-group">
                 <label for="screenshot" class="form-label">
                     <i class="fas fa-image"></i> Screenshot (Optional)
                 </label>
                 <input type="file" name="screenshot" id="screenshot" class="form-control" accept="image/*">
                 <p class="form-hint">Upload a screenshot if it helps explain the issue (max 5MB)</p>
-            </div>
+            </div> --}}
 
             <div class="form-actions">
                 <button type="submit" class="btn-submit">
